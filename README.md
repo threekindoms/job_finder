@@ -18,14 +18,14 @@ Changing the scoring prompt or weights automatically invalidates cached scores. 
 
 - Python 3.11+
 - [Ollama](https://ollama.com) running locally with the models listed in `.env` (or an Ollama-compatible cloud endpoint)
-  - Or [Cloud] cloud models with API keys
+  - Or [Cloud]() cloud models with API keys
 - [Playwright](https://playwright.dev/python/) + a Chromium browser — only needed for `--search-url` scraping
 
 ## Installation
 
 ```bash
 git clone <repo>
-cd agents_linkedin
+cd job_finder
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
