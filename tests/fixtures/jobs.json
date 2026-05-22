@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Backend Software Engineer",
+    "link": "https://example.com/jobs/backend-engineer",
+    "description": "Build backend services in Java and Python.",
+    "requirements": [
+      "5+ years of programming experience",
+      "Experience with at least one programming language"
+    ],
+    "optional_requirements": ["Go experience"]
+  },
+  {
+    "title": "Software Engineer II",
+    "link": "https://example.com/jobs/software-engineer-ii",
+    "description": "Develop production services with a software engineering team.",
+    "requirements": [
+      "5+ years of non-internship professional software development experience"
+    ],
+    "optional_requirements": []
+  },
+  {
+    "title": "Platform Engineer",
+    "link": "https://example.com/jobs/platform-engineer",
+    "description": "Operate Kubernetes workloads and platform services.",
+    "requirements": ["Experience building products or services with Kubernetes"],
+    "optional_requirements": ["Linux experience", "Docker experience"]
+  },
+  {
+    "title": "Backend Software Engineer",
+    "link": "https://example.com/jobs/backend-engineer",
+    "description": "Duplicate copy of the backend engineer role.",
+    "requirements": ["5+ years of programming experience"],
+    "optional_requirements": []
+  },
+  {
+    "title": "Ignored Job",
+    "link": "https://example.com/jobs/ignored-job",
+    "description": "This job is intentionally present for ignore-list tests.",
+    "requirements": ["Python"],
+    "optional_requirements": []
+  }
+]

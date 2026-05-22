@@ -1,0 +1,12 @@
+{
+  "professional_summary": "Software engineer with backend development experience.",
+  "skills": ["Java", "Python", "Go"],
+  "work_experience": [
+    {
+      "summary": "2020-2026: Software Engineer at Example Corp",
+      "keywords": ["Java", "Python"]
+    }
+  ],
+  "education": ["B.S. in Computer Science"],
+  "location": "San Francisco, CA"
+}

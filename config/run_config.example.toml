@@ -1,0 +1,48 @@
+# Job matching run configuration.
+# Copy this file, fill in your values, and run:
+#
+#   python -m src.cli --config config/run_config.toml
+#
+# CLI flags always override values set here.
+
+# ── Required ──────────────────────────────────────────────────────────────────
+
+resume = "path/to/resume.pdf"
+
+# ── Job input (choose one) ────────────────────────────────────────────────────
+
+# Option 1: file with one LinkedIn URL per line
+manual_links = "path/to/job_links.txt"
+
+# Option 2: direct URLs (comment out manual_links above if using this)
+# job_url = [
+#   "https://www.linkedin.com/jobs/view/1234567890/",
+#   "https://www.linkedin.com/jobs/view/9876543210/",
+# ]
+
+# Option 3: LinkedIn search URL — scrapes all pages automatically (requires
+# LINKEDIN_COOKIE_FILE to be set in .env; see docs/job-matching/08-web-scraping.md)
+# search_url = "https://www.linkedin.com/jobs/search/?keywords=Software+Engineer&location=Seattle"
+
+# Scrape job URLs and save to a temp file, then exit without running matching.
+# Requires search_url above. The saved file can be passed later with manual_links.
+# scrape_only = true
+
+# ── Optional ──────────────────────────────────────────────────────────────────
+
+top_n = 10
+
+# Ollama cloud prefilter models (uses OLLAMA_CLOUD_BASE_URL / OLLAMA_CLOUD_API_KEY from .env)
+# Listed models are added to the prefilter pool alongside any LOCAL_PREFILTER_MODELS.
+# cloud_prefilter_models = ["llama3.3:70b", "qwen2.5:72b"]
+
+# Jobs to skip (already reviewed, not relevant, etc.)
+# ignore_link = [
+#   "https://www.linkedin.com/jobs/view/0000000000/",
+# ]
+
+# Skip live web fetching and load saved job records instead
+# jobs_file = "path/to/jobs.json"
+
+# Skip resume extraction and load a saved candidate profile instead
+# candidate_profile_file = "path/to/candidate_profile.json"

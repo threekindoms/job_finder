@@ -1,0 +1,30 @@
+.env
+config/run_config.toml
+config/linkedin_cookies.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Run artifacts
+runs/
+experiments/
+
+# Persistent store
+storage/
+
+# OS
+.DS_Store
+
+# AI coders
+AGENTS.md
+docs/

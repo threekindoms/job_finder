@@ -1,0 +1,11 @@
+Software engineer with 6 years of Java experience, 2 years of Python experience,
+and 1 year of Go experience. Built backend services and internal developer tools.
+
+Work Experience
+- 2020-2026: Software Engineer at Example Corp
+
+Education
+- B.S. in Computer Science
+
+Location
+- San Francisco, CA
