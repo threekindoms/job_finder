@@ -401,48 +401,88 @@ def build_ollama_dependencies(
             return results
 
         first_model, second_model = primary_models
-        first_results = {
-            str(result.job_link): result for result in results[first_model[0]]
-        }
-        second_results = {
-            str(result.job_link): result for result in results[second_model[0]]
-        }
-        disputed_jobs = [
-            job
-            for job in jobs
-            if str(job.link) in first_results
-            and str(job.link) in second_results
-            and first_results[str(job.link)].should_advance
-            != second_results[str(job.link)].should_advance
-        ]
-        if not disputed_jobs:
+        first_by_link = {str(r.job_link): r for r in results[first_model[0]]}
+        second_by_link = {str(r.job_link): r for r in results[second_model[0]]}
+
+        # Categorize each job and decide which need tiebreaker resolution.
+        # For jobs where exactly one primary failed (#3), a synthetic opposing
+        # vote is added so the tiebreaker becomes the decisive third vote.
+        needs_tiebreaker: list[JobPosting] = []
+        synthetic_votes: list[LocalPrefilterResult] = []
+
+        for job in jobs:
+            link = str(job.link)
+            in_first = link in first_by_link
+            in_second = link in second_by_link
+
+            if in_first and in_second:
+                if first_by_link[link].should_advance != second_by_link[link].should_advance:
+                    # Both primaries ran and disagree → tiebreaker required.
+                    needs_tiebreaker.append(job)
+            elif in_first:
+                # Second model failed — add synthetic opposing vote so tiebreaker is decisive (#3).
+                synthetic_votes.append(LocalPrefilterResult(
+                    job_link=link,
+                    local_score=0,
+                    should_advance=not first_by_link[link].should_advance,
+                    short_reason=f"{second_model[0]} failed; treated as opposing vote",
+                ))
+                needs_tiebreaker.append(job)
+            elif in_second:
+                # First model failed — add synthetic opposing vote so tiebreaker is decisive (#3).
+                synthetic_votes.append(LocalPrefilterResult(
+                    job_link=link,
+                    local_score=0,
+                    should_advance=not second_by_link[link].should_advance,
+                    short_reason=f"{first_model[0]} failed; treated as opposing vote",
+                ))
+                needs_tiebreaker.append(job)
+            else:
+                # Both primaries failed — tiebreaker has the final decision (#5).
+                needs_tiebreaker.append(job)
+
+        if synthetic_votes:
+            results["_failed_primary"] = synthetic_votes
+
+        if not needs_tiebreaker:
             return results
 
         tiebreak_model_name, tiebreak_chain = ordered_models[2]
-        print(f"  [tiebreaker: {tiebreak_model_name}] {len(disputed_jobs)} disputed job(s)")
+        print(f"  [tiebreaker: {tiebreak_model_name}] {len(needs_tiebreaker)} job(s) need resolution")
         tiebreak_results: list[LocalPrefilterResult] = []
-        for job in disputed_jobs:
+        fallback_results: list[LocalPrefilterResult] = []
+
+        for job in needs_tiebreaker:
+            link = str(job.link)
+            company_part = f" @ {job.company}" if job.company else ""
             try:
                 if store_conn is not None and r_hash:
-                    cached = get_prefilter(store_conn, r_hash, str(job.link), tiebreak_model_name)
+                    cached = get_prefilter(store_conn, r_hash, link, tiebreak_model_name)
                     if cached is not None:
-                        company_part = f" @ {job.company}" if job.company else ""
                         print(f"    [{cached.local_score:3d}] {job.title}{company_part} — {job.link} [cached]")
                         tiebreak_results.append(cached)
                         continue
                 result = _invoke_prefilter(tiebreak_chain, candidate_json, job)
-                company_part = f" @ {job.company}" if job.company else ""
                 print(f"    [{result.local_score:3d}] {job.title}{company_part} — {job.link}")
                 if store_conn is not None and r_hash:
                     try:
-                        put_prefilter(store_conn, r_hash, str(job.link), tiebreak_model_name, result)
+                        put_prefilter(store_conn, r_hash, link, tiebreak_model_name, result)
                     except Exception:
                         pass
                 tiebreak_results.append(result)
             except Exception as exc:
-                company_part = f" @ {job.company}" if job.company else ""
                 print(f"    PREFILTER_FAILED [{job.title}{company_part}]: {exc}")
+                # Tiebreaker failed → default to advancing the job (recall-first, #4/#5).
+                fallback_results.append(LocalPrefilterResult(
+                    job_link=link,
+                    local_score=50,
+                    should_advance=True,
+                    short_reason="tiebreaker failed; defaulting to advance (recall-first)",
+                ))
+
         results[tiebreak_model_name] = tiebreak_results
+        if fallback_results:
+            results["_tiebreaker_fallback"] = fallback_results
         return results
 
     def scorer(candidate: CandidateProfile, job: JobPosting) -> MatchResult:

@@ -34,7 +34,16 @@ def build_artifacts(report: RunReport) -> dict[str, Any]:
         ),
         "jobs": [job.model_dump(mode="json") for job in report.searched_jobs],
         "top_matches": [_enrich_match(match) for match in report.top_matches],
-        "remaining_ranked_jobs": report.remaining_ranked_jobs,
+        "remaining_ranked_jobs": [
+            {
+                **row,
+                **({
+                    "title": jobs_by_link[row["job_link"]].title,
+                    "company": jobs_by_link[row["job_link"]].company,
+                } if row.get("job_link") in jobs_by_link else {}),
+            }
+            for row in report.remaining_ranked_jobs
+        ],
         "summary": build_summary(report),
         "usage": None if report.usage is None else report.usage.model_dump(mode="json"),
     }

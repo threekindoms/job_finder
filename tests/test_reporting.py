@@ -84,7 +84,10 @@ def test_build_artifacts_serializes_models():
 
     assert artifacts["jobs"][0]["title"] == "Backend Software Engineer"
     assert artifacts["top_matches"][0]["confidence"] == "high"
-    assert artifacts["remaining_ranked_jobs"][0]["overall_score"] == 74
+    remaining = artifacts["remaining_ranked_jobs"][0]
+    assert remaining["overall_score"] == 74
+    assert remaining["title"] == "Software Engineer II"
+    assert remaining["company"] in (None, "")
 
 
 def test_write_run_artifacts_creates_expected_files(tmp_path):

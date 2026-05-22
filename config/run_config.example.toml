@@ -30,6 +30,9 @@ manual_links = "path/to/job_links.txt"
 
 # ── Optional ──────────────────────────────────────────────────────────────────
 
+# Number of top-matched jobs to show with full detail (scores, strengths, gaps,
+# and resume suggestions). Jobs ranked below this threshold are listed with title
+# and link only.
 top_n = 10
 
 # Ollama cloud prefilter models (uses OLLAMA_CLOUD_BASE_URL / OLLAMA_CLOUD_API_KEY from .env)
