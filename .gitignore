@@ -1,5 +1,5 @@
 .env
-config/run_config.toml
+config/run_config*.toml
 config/linkedin_cookies.json
 
 # Python
