@@ -201,3 +201,37 @@ def test_settings_from_env_parses_defaults_and_lists(monkeypatch):
     assert settings.local_prefilter_models == ["qwen2.5:7b", "llama3.1:8b"]
     assert settings.max_paid_llm_jobs == 12
     assert settings.shortlist_scoring_provider == "openai"
+
+
+def test_settings_from_env_resolves_relative_paths_against_pythonpath(monkeypatch, tmp_path):
+    monkeypatch.setenv("PYTHONPATH", str(tmp_path))
+    monkeypatch.delenv("RUNS_DIR", raising=False)
+    monkeypatch.delenv("STORAGE_DB_PATH", raising=False)
+    monkeypatch.delenv("LINKEDIN_COOKIE_FILE", raising=False)
+
+    settings = Settings.from_env()
+
+    assert settings.runs_dir == tmp_path / "runs"
+    assert settings.storage_db_path == tmp_path / "storage" / "store.db"
+    assert settings.linkedin_cookie_file == tmp_path / "config" / "linkedin_cookies.json"
+
+
+def test_settings_from_env_absolute_paths_are_not_relocated(monkeypatch, tmp_path):
+    monkeypatch.setenv("PYTHONPATH", str(tmp_path))
+    monkeypatch.setenv("RUNS_DIR", "/var/runs")
+    monkeypatch.setenv("STORAGE_DB_PATH", "/var/db/store.db")
+
+    settings = Settings.from_env()
+
+    assert settings.runs_dir == Path("/var/runs")
+    assert settings.storage_db_path == Path("/var/db/store.db")
+
+
+def test_settings_from_env_relative_paths_stay_relative_without_pythonpath(monkeypatch):
+    monkeypatch.delenv("PYTHONPATH", raising=False)
+    monkeypatch.delenv("RUNS_DIR", raising=False)
+
+    settings = Settings.from_env()
+
+    assert not settings.runs_dir.is_absolute()
+    assert settings.runs_dir == Path("runs")

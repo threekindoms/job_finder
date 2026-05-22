@@ -30,6 +30,22 @@ class Settings(BaseModel):
         def _parse_model_list(env_var: str) -> list[str]:
             return [m.strip() for m in os.getenv(env_var, "").split(",") if m.strip()]
 
+        # Resolve project-relative paths against the first PYTHONPATH entry so
+        # the tool works correctly regardless of the working directory it is
+        # invoked from (e.g. `PYTHONPATH=/path/to/project python -m src.cli`).
+        pythonpath_root: Path | None = None
+        raw_pythonpath = os.getenv("PYTHONPATH", "")
+        if raw_pythonpath:
+            first_entry = raw_pythonpath.split(":")[0].strip()
+            if first_entry:
+                pythonpath_root = Path(first_entry).resolve()
+
+        def _abs(path: Path) -> Path:
+            """Return path as-is if absolute; otherwise anchor it to PYTHONPATH root."""
+            if path.is_absolute() or pythonpath_root is None:
+                return path
+            return pythonpath_root / path
+
         return cls(
             ollama_base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
             local_prefilter_models=_parse_model_list("LOCAL_PREFILTER_MODELS"),
@@ -46,14 +62,14 @@ class Settings(BaseModel):
             skip_paid_llm_if_local_score_below=int(
                 os.getenv("SKIP_PAID_LLM_IF_LOCAL_SCORE_BELOW", "80")
             ),
-            runs_dir=Path(os.getenv("RUNS_DIR", "runs")),
-            linkedin_cookie_file=Path(
-                os.getenv("LINKEDIN_COOKIE_FILE", "config/linkedin_cookies.json")
+            runs_dir=_abs(Path(os.getenv("RUNS_DIR", "runs"))),
+            linkedin_cookie_file=_abs(
+                Path(os.getenv("LINKEDIN_COOKIE_FILE", "config/linkedin_cookies.json"))
             ),
             linkedin_headless=os.getenv("LINKEDIN_HEADLESS", "true").lower()
             not in ("false", "0", "no"),
             linkedin_max_pages=int(os.getenv("LINKEDIN_MAX_PAGES", "20")),
-            storage_db_path=Path(os.getenv("STORAGE_DB_PATH", "storage/store.db")),
+            storage_db_path=_abs(Path(os.getenv("STORAGE_DB_PATH", "storage/store.db"))),
             backup_db_path=Path(
                 os.getenv("BACKUP_DB_PATH", str(Path.home() / "Documents/Storages/resume_matching"))
             ),
