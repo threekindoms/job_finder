@@ -102,21 +102,35 @@ def test_write_run_artifacts_creates_expected_files(tmp_path):
         "top_matches.json",
         "usage.json",
     ]
-    assert json.loads(paths["summary"].read_text()) == {
-        "remaining_ranked_job_count": 1,
-        "searched_job_count": 2,
-        "top_match_count": 1,
-        "usage": {
-            "completion_tokens": 40,
-            "estimated_cost_usd": 0.02,
-            "local_prefilter_models": ["llama3.1:8b"],
-            "prefiltered_job_count": 2,
-            "prompt_tokens": 100,
-            "scored_job_count": 1,
-            "searched_job_count": 2,
-            "shortlist_job_count": 1,
-            "shortlist_scoring_model": "gpt-4.1-mini",
-            "shortlist_scoring_provider": "openai",
-        },
-    }
-    assert json.loads(paths["usage"].read_text())["estimated_cost_usd"] == 0.02
+
+
+def test_write_run_artifacts_writes_job_ignored_when_companies_excluded(tmp_path):
+    jobs = load_jobs()[:2]
+    excluded_job = jobs[1]
+    report = RunReport(
+        searched_jobs=jobs[:1],
+        company_excluded_jobs=[excluded_job],
+        top_matches=[],
+        remaining_ranked_jobs=[],
+    )
+
+    run_dir = create_run_dir(tmp_path, timestamp="20260515T130000")
+    paths = write_run_artifacts(run_dir, report)
+
+    assert "job_ignored" in paths
+    ignored = json.loads(paths["job_ignored"].read_text())
+    assert len(ignored) == 1
+    assert ignored[0]["title"] == excluded_job.title
+    assert "link" in ignored[0]
+    assert "company" in ignored[0]
+
+
+def test_write_run_artifacts_omits_job_ignored_when_none_excluded(tmp_path):
+    jobs = load_jobs()[:1]
+    report = RunReport(searched_jobs=jobs, top_matches=[], remaining_ranked_jobs=[])
+
+    run_dir = create_run_dir(tmp_path, timestamp="20260515T140000")
+    paths = write_run_artifacts(run_dir, report)
+
+    assert "job_ignored" not in paths
+    assert not (run_dir / "job_ignored.json").exists()

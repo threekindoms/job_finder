@@ -33,6 +33,14 @@ def build_artifacts(report: RunReport) -> dict[str, Any]:
             else report.candidate_profile.model_dump(mode="json")
         ),
         "jobs": [job.model_dump(mode="json") for job in report.searched_jobs],
+        "company_excluded_jobs": [
+            {
+                "title": job.title,
+                "company": job.company,
+                "link": str(job.link),
+            }
+            for job in report.company_excluded_jobs
+        ],
         "top_matches": [_enrich_match(match) for match in report.top_matches],
         "remaining_ranked_jobs": [
             {

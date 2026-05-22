@@ -44,6 +44,10 @@ top_n = 10
 #   "https://www.linkedin.com/jobs/view/0000000000/",
 # ]
 
+# Companies to exclude entirely from prefiltering and scoring.
+# Matching is fuzzy: "Google" also excludes "Google LLC", "Google, Inc.", etc.
+# ignore_company = ["Google", "Amazon"]
+
 # Skip live web fetching and load saved job records instead
 # jobs_file = "path/to/jobs.json"
 

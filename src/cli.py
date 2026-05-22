@@ -46,6 +46,7 @@ def run_workflow(
     settings: Settings,
     job_urls: Iterable[str] | None = None,
     ignore_links: Iterable[str] | None = None,
+    ignored_companies: Iterable[str] | None = None,
     top_n: int = 10,
     timestamp: str | None = None,
 ) -> tuple[RunReport, Path]:
@@ -62,9 +63,10 @@ def run_workflow(
             raise ValueError("at least one job URL is required")
 
     print(f"Fetching {len(links)} job(s)...")
-    jobs = normalize_job_records(
+    jobs, company_excluded = normalize_job_records(
         dependencies.job_loader(links),
         ignored_links=ignore_links,
+        ignored_companies=ignored_companies,
     )
 
     print(f"Running prefilter on {len(jobs)} job(s)...")
@@ -89,6 +91,7 @@ def run_workflow(
     report = RunReport(
         candidate_profile=candidate,
         searched_jobs=jobs,
+        company_excluded_jobs=company_excluded,
         top_matches=top_matches,
         remaining_ranked_jobs=remaining_ranked_jobs,
         usage=UsageSummary(
@@ -112,7 +115,7 @@ def load_run_config(path: str | Path) -> dict[str, Any]:
     """Load run parameters from a TOML config file."""
     with open(path, "rb") as f:
         raw = tomllib.load(f)
-    for key in ("job_url", "ignore_link"):
+    for key in ("job_url", "ignore_link", "ignore_company"):
         if key in raw and isinstance(raw[key], str):
             raw[key] = [raw[key]]
     return raw
@@ -155,6 +158,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         default=[],
         help="Job link to ignore; repeat for multiple values.",
+    )
+    parser.add_argument(
+        "--ignore-company",
+        action="append",
+        default=[],
+        help="Company name to exclude; fuzzy-matched against job postings; repeat for multiple.",
     )
     parser.add_argument("--top-n", type=int, default=10, help="Number of top matches.")
     return parser
@@ -261,6 +270,7 @@ def main() -> None:
         settings=settings,
         job_urls=job_urls,
         ignore_links=args.ignore_link,
+        ignored_companies=args.ignore_company,
         top_n=args.top_n,
     )
 

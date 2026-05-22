@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from src.ingest.jobs import extract_job_posting, normalize_job_records
+from src.ingest.jobs import company_matches, extract_job_posting, normalize_job_records
 from src.ingest.manual_links import load_job_links
 from src.ingest.resume import extract_candidate_profile, load_resume_text
 from src.ingest.scraping import LinkedInSearchScraper
@@ -45,7 +45,7 @@ def test_load_job_links_rejects_invalid_urls(tmp_path):
 
 
 def test_normalize_job_records_deduplicates_and_filters_ignored_jobs():
-    jobs = normalize_job_records(
+    jobs, _ = normalize_job_records(
         load_json("jobs.json"),
         ignored_links=["https://example.com/jobs/ignored-job"],
     )
@@ -57,9 +57,72 @@ def test_normalize_job_records_deduplicates_and_filters_ignored_jobs():
     ]
 
 
+def _job_record(title: str, company: str, slug: str) -> dict:
+    return {
+        "title": title,
+        "company": company,
+        "link": f"https://example.com/jobs/{slug}",
+        "description": slug,
+    }
+
+
+def test_company_matches_exact():
+    assert company_matches("Google", "Google") is True
+
+
+def test_company_matches_strips_legal_suffix():
+    assert company_matches("Google LLC", "Google") is True
+    assert company_matches("Google", "Google, Inc.") is True
+
+
+def test_company_matches_case_insensitive():
+    assert company_matches("AMAZON", "amazon") is True
+
+
+def test_company_matches_contained_name():
+    assert company_matches("Amazon Web Services", "Amazon") is True
+    assert company_matches("Meta", "Meta Platforms") is True
+
+
+def test_company_matches_rejects_unrelated():
+    assert company_matches("Microsoft", "Google") is False
+
+
+def test_company_matches_empty_strings():
+    assert company_matches("", "Google") is False
+    assert company_matches("Google", "") is False
+
+
+def test_normalize_job_records_excludes_ignored_company():
+    records = [
+        _job_record("SWE", "Google LLC", "g"),
+        _job_record("SWE", "Amazon", "a"),
+        _job_record("SWE", "Acme Corp", "acme"),
+    ]
+    jobs, excluded = normalize_job_records(records, ignored_companies=["Google", "Amazon"])
+
+    assert [job.company for job in jobs] == ["Acme Corp"]
+    assert len(excluded) == 2
+    assert {job.company for job in excluded} == {"Google LLC", "Amazon"}
+
+
+def test_normalize_job_records_keeps_jobs_with_no_company():
+    records = [
+        _job_record("SWE", "", "no-company"),
+        _job_record("SWE", "Google LLC", "google"),
+    ]
+    jobs, excluded = normalize_job_records(records, ignored_companies=["Google"])
+
+    assert len(jobs) == 1
+    assert jobs[0].title == "SWE"
+    assert str(jobs[0].link) == "https://example.com/jobs/no-company"
+    assert len(excluded) == 1
+    assert excluded[0].company == "Google LLC"
+
+
 def test_normalize_job_records_rejects_malformed_jobs():
     with pytest.raises(ValidationError):
-        normalize_job_records([load_json("malformed_job.json")])
+        normalize_job_records([load_json("malformed_job.json")])  # type: ignore[call-overload]
 
 
 def test_extract_job_posting_uses_injected_structured_extractor():

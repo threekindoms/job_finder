@@ -30,6 +30,7 @@ def write_run_artifacts(run_dir: str | Path, report: RunReport) -> dict[str, Pat
     paths = {
         "candidate_profile": directory / "candidate_profile.json",
         "jobs": directory / "jobs.json",
+        "job_ignored": directory / "job_ignored.json",
         "top_matches": directory / "top_matches.json",
         "remaining_ranked_jobs": directory / "remaining_ranked_jobs.json",
         "summary": directory / "summary.json",
@@ -41,6 +42,10 @@ def write_run_artifacts(run_dir: str | Path, report: RunReport) -> dict[str, Pat
     else:
         paths.pop("candidate_profile")
     write_json(paths["jobs"], artifacts["jobs"])
+    if artifacts["company_excluded_jobs"]:
+        write_json(paths["job_ignored"], artifacts["company_excluded_jobs"])
+    else:
+        paths.pop("job_ignored")
     write_json(paths["top_matches"], artifacts["top_matches"])
     write_json(paths["remaining_ranked_jobs"], artifacts["remaining_ranked_jobs"])
     write_json(paths["summary"], artifacts["summary"])

@@ -234,6 +234,7 @@ class UsageSummary(BaseModel):
 class RunReport(BaseModel):
     candidate_profile: CandidateProfile | None = None
     searched_jobs: list[JobPosting] = Field(default_factory=list)
+    company_excluded_jobs: list[JobPosting] = Field(default_factory=list)
     top_matches: list[MatchResult] = Field(default_factory=list)
     remaining_ranked_jobs: list[dict[str, Any]] = Field(default_factory=list)
     usage: UsageSummary | None = None
