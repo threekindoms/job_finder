@@ -17,7 +17,7 @@ def create_run_dir(runs_dir: str | Path, timestamp: str | None = None) -> Path:
 
 def write_json(path: str | Path, payload: Any) -> None:
     Path(path).write_text(
-        json.dumps(payload, indent=2, sort_keys=True),
+        json.dumps(payload, indent=2),
         encoding="utf-8",
     )
 

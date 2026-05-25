@@ -161,13 +161,13 @@ class MatchResult(BaseModel):
     experience_level_score: int = Field(ge=0, le=9)
     domain_fit_score: int = Field(ge=0, le=9)
     location_or_availability_score: int = Field(ge=0, le=2)
-    requirement_assessments: list[RequirementAssessment] = Field(default_factory=list)
-    preferred_requirement_assessments: list[RequirementAssessment] = Field(default_factory=list)
+    confidence: ConfidenceLevel
     strengths: list[str] = Field(default_factory=list)
     gaps: list[str] = Field(default_factory=list)
     other_considerations: list[str] = Field(default_factory=list)
+    requirement_assessments: list[RequirementAssessment] = Field(default_factory=list)
+    preferred_requirement_assessments: list[RequirementAssessment] = Field(default_factory=list)
     resume_improvement_suggestions: list[str] = Field(default_factory=list)
-    confidence: ConfidenceLevel
 
     @model_validator(mode="before")
     @classmethod

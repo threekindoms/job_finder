@@ -2,6 +2,8 @@
 
 Matches a resume against LinkedIn job postings using local LLMs for pre-filtering and a configurable model for detailed scoring. Results are cached in a local SQLite database so repeated runs skip expensive LLM calls for already-processed inputs.
 
+Each run starts with scraping a searching URL for job listing with pagenations. Targeting LinkedIn but can be extended to other links. After all jobs are obtained, it matches an input resume with the job list and find all possible matches.
+
 ## How it works
 
 1. Load job URLs — from a LinkedIn search URL (auto-scraped), a local file, or direct URLs.

@@ -23,8 +23,7 @@ def build_artifacts(report: RunReport) -> dict[str, Any]:
         d = match.model_dump(mode="json")
         job = jobs_by_link.get(str(match.job_link))
         if job is not None:
-            d["title"] = job.title
-            d["company"] = job.company
+            return {"company": job.company, "title": job.title, **d}
         return d
 
     return {
