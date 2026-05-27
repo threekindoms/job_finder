@@ -124,11 +124,11 @@ def test_match_result_normalizes_weighted_dimension_bounds():
     match = MatchResult(
         job_link="https://example.com/jobs/backend-engineer",
         overall_score=100,
-        required_qualifications_score=60,
-        preferred_qualifications_score=20,
+        required_qualifications_score=53,
+        preferred_qualifications_score=22,
         experience_level_score=9,
-        domain_fit_score=9,
-        location_or_availability_score=2,
+        domain_fit_score=15,
+        location_or_availability_score=1,
         strengths=["Strong programming-language match."],
         gaps=[],
         other_considerations=[],
@@ -153,11 +153,11 @@ def test_match_result_normalizes_weighted_dimension_bounds():
         confidence=ConfidenceLevel.HIGH,
     )
 
-    assert normalized.required_qualifications_score == 60
-    assert normalized.preferred_qualifications_score == 20
+    assert normalized.required_qualifications_score == 53
+    assert normalized.preferred_qualifications_score == 22
     assert normalized.experience_level_score == 9
-    assert normalized.domain_fit_score == 9
-    assert normalized.location_or_availability_score == 2
+    assert normalized.domain_fit_score == 15
+    assert normalized.location_or_availability_score == 1
     assert normalized.overall_score == 100
 
 

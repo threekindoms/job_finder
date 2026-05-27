@@ -145,22 +145,22 @@ class RequirementAssessment(BaseModel):
 
 
 SCORE_MAXIMA: dict[str, int] = {
-    "required_qualifications_score": 60,
-    "preferred_qualifications_score": 20,
+    "required_qualifications_score": 53,
+    "preferred_qualifications_score": 22,
     "experience_level_score": 9,
-    "domain_fit_score": 9,
-    "location_or_availability_score": 2,
+    "domain_fit_score": 15,
+    "location_or_availability_score": 1,
 }
 
 
 class MatchResult(BaseModel):
     job_link: HttpUrl
     overall_score: int = Field(ge=0, le=100)
-    required_qualifications_score: int = Field(default=0, ge=0, le=60)
-    preferred_qualifications_score: int = Field(default=0, ge=0, le=20)
+    required_qualifications_score: int = Field(default=0, ge=0, le=53)
+    preferred_qualifications_score: int = Field(default=0, ge=0, le=22)
     experience_level_score: int = Field(ge=0, le=9)
-    domain_fit_score: int = Field(ge=0, le=9)
-    location_or_availability_score: int = Field(ge=0, le=2)
+    domain_fit_score: int = Field(ge=0, le=15)
+    location_or_availability_score: int = Field(ge=0, le=1)
     confidence: ConfidenceLevel
     strengths: list[str] = Field(default_factory=list)
     gaps: list[str] = Field(default_factory=list)
@@ -183,7 +183,7 @@ class MatchResult(BaseModel):
             if valid:
                 total_credit = sum(float(a.get("credit", 0)) for a in valid)
                 normalized["required_qualifications_score"] = round(
-                    total_credit / len(valid) * 60
+                    total_credit / len(valid) * 53
                 )
 
         # Compute preferred_qualifications_score from per-requirement credits when available.
@@ -193,7 +193,7 @@ class MatchResult(BaseModel):
             if valid:
                 total_credit = sum(float(a.get("credit", 0)) for a in valid)
                 normalized["preferred_qualifications_score"] = round(
-                    total_credit / len(valid) * 20
+                    total_credit / len(valid) * 22
                 )
 
         for field_name, maximum in SCORE_MAXIMA.items():

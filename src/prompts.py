@@ -73,11 +73,11 @@ Job posting:
 SHORTLIST_SCORING_SYSTEM_PROMPT_LOCAL = """Score the job against the candidate profile.
 
 Use this weighted rubric (scores are integers within each range):
-- required qualifications: 0–60  (computed from requirement_assessments — see below)
-- preferred qualifications: 0–20  (computed from preferred_requirement_assessments — see below)
+- required qualifications: 0–53  (computed from requirement_assessments — see below)
+- preferred qualifications: 0–22  (computed from preferred_requirement_assessments — see below)
 - experience level: 0–9
-- domain fit: 0–9
-- location or availability: 0–2
+- domain fit: 0–15
+- location or availability: 0–1
 
 For required_qualifications_score, fill `requirement_assessments` instead of computing
 the number yourself. For every required qualification listed in the job posting, add one
@@ -121,11 +121,11 @@ Rules:
 SHORTLIST_SCORING_SYSTEM_PROMPT_CLOUD = """Score the job against the candidate profile.
 
 Use this weighted rubric:
-- required qualifications: 0–60
-- preferred qualifications: 0–20
+- required qualifications: 0–53
+- preferred qualifications: 0–22
 - experience level: 0–9
-- domain fit: 0–9
-- location or availability: 0–2
+- domain fit: 0–15
+- location or availability: 0–1
 
 Scoring required_qualifications_score and preferred_qualifications_score — be rigorous:
 - Assess each listed qualification independently:
@@ -134,10 +134,10 @@ Scoring required_qualifications_score and preferred_qualifications_score — be 
     - Half credit (0.5): clearly overlapping but not identical — the exact skill is absent
       but a meaningful subset is directly present.
     - Zero credit (0.0): absent, only implied, or merely adjacent.
-- required_qualifications_score = round(sum_of_credits / count_of_requirements * 60)
-- preferred_qualifications_score = round(sum_of_credits / count_of_preferred * 20)
+- required_qualifications_score = round(sum_of_credits / count_of_requirements * 53)
+- preferred_qualifications_score = round(sum_of_credits / count_of_preferred * 22)
 - If no preferred qualifications are listed, set preferred_qualifications_score to 0.
-- location_or_availability_score: 2 if location matches or role is remote, 0 otherwise.
+- location_or_availability_score: 1 if location matches or role is remote, 0 otherwise.
 
 Rules:
 - Use only evidence explicitly present in the candidate profile and job posting.
